@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creator Marathi - Cartoon Video</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #111827;
+  color: white;
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 25px 18px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #b8c0cc;
+  margin-bottom: 25px;
+}
+
+.card {
+  background: #1f2937;
+  padding: 20px;
+  border-radius: 18px;
+  margin-bottom: 20px;
+}
+
+.upload {
+  border: 2px dashed #60a5fa;
+  padding: 30px 15px;
+  text-align: center;
+  border-radius: 15px;
+  cursor: pointer;
+}
+
+.upload input {
+  display: none;
+}
+
+button {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  font-size: 17px;
+  font-weight: bold;
+  margin-top: 15px;
+  cursor: pointer;
+}
+
+#createBtn {
+  background: #22c55e;
+  color: white;
+}
+
+#downloadBtn {
+  background: #3b82f6;
+  color: white;
+  display: none;
+}
+
+select {
+  width: 100%;
+  padding: 14px;
+  border-radius: 10px;
+  background: #111827;
+  color: white;
+  border: 1px solid #4b5563;
+  margin-top: 10px;
+}
+
+video {
+  width: 100%;
+  margin-top: 15px;
+  border-radius: 12px;
+  background: black;
+}
+
+#status {
+  text-align: center;
+  margin-top: 15px;
+  color: #93c5fd;
+}
+
+canvas {
+  display: none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🎬 Creator Marathi</h1>
+  <div class="subtitle">
+    AI Cartoon Video Studio
+  </div>
+
+  <div class="card">
+
+    <label class="upload">
+      🎥
+      <br><br>
+      <strong>Video निवडा</strong>
+      <br>
+      तुमचा video इथे upload करा
+      <input type="file" id="videoInput" accept="video/*">
+    </label>
+
+    <select id="style">
+      <option value="cartoon">🎨 Cartoon</option>
+      <option value="comic">🦸 Comic</option>
+      <option value="soft">✨ Soft Cartoon</option>
+    </select>
+
+    <button id="createBtn">
+      🤖 CREATE CARTOON VIDEO
+    </button>
+
+    <div id="status">
+      Video निवडा आणि CREATE CARTOON VIDEO दाबा.
+    </div>
+
+  </div>
+
+  <div class="card">
+    <video id="preview" controls></video>
+
+    <button id="downloadBtn">
+      ⬇️ DOWNLOAD CARTOON VIDEO
+    </button>
+  </div>
+
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+
+const videoInput = document.getElementById("videoInput");
+const preview = document.getElementById("preview");
+const createBtn = document.getElementById("createBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+const statusText = document.getElementById("status");
+const canvas = document.getElementById("canvas");
+const styleSelect = document.getElementById("style");
+
+let selectedVideo = null;
+let outputURL = null;
+
+videoInput.addEventListener("change", function() {
+
+  if (!this.files.length) return;
+
+  selectedVideo = this.files[0];
+
+  const url = URL.createObjectURL(selectedVideo);
+
+  preview.src = url;
+
+  statusText.innerText =
+    "✅ Video निवडला आहे. आता CREATE CARTOON VIDEO दाबा.";
+
+});
+
+createBtn.addEventListener("click", async function() {
+
+  if (!selectedVideo) {
+    alert("कृपया आधी video निवडा.");
+    return;
+  }
+
+  createBtn.disabled = true;
+  downloadBtn.style.display = "none";
+
+  statusText.innerText =
+    "🤖 Cartoon video तयार होत आहे...";
+
+  const video = document.createElement("video");
+
+  video.src = URL.createObjectURL(selectedVideo);
+  video.muted = true;
+  video.playsInline = true;
+
+  await new Promise(resolve => {
+    video.onloadedmetadata = resolve;
+  });
+
+  const maxWidth = 720;
+
+  let width = video.videoWidth;
+  let height = video.videoHeight;
+
+  if (width > maxWidth) {
+    height = Math.round(height * maxWidth / width);
+    width = maxWidth;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d", {
+    willReadFrequently: true
+  });
+
+  const stream = canvas.captureStream(30);
+
+  const recorder = new MediaRecorder(stream, {
+    mimeType: "
